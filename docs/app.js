@@ -103,6 +103,22 @@ const SECTIONS = [
 ];
 
 /* =========================
+   2.) STORAGE HELPERS
+   F: Section Data Helpers (JSON)
+========================= */
+STORAGE_KEYS.sectionA = 'mcq_section_a';
+
+function getStoredJSON(key, fallback) {
+  const raw = getStored(key);
+  if (!raw) return fallback;
+  try { return JSON.parse(raw); } catch { return fallback; }
+}
+
+function setStoredJSON(key, value) {
+  setStored(key, JSON.stringify(value));
+}
+
+/* =========================
    3.) PLAYER ID
    A: Ensure we have one
 ========================= */
