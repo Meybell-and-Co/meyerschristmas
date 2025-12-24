@@ -102,6 +102,40 @@ const SECTIONS = [
   { id: 'E', title: 'Quistmas Quiplash',         screen: 'section-e' }
 ];
 
+
+/* =========================
+   2.) CONTENT
+   A: Speech Bubble Prompt Bank
+========================= */
+const SECTION_A_PROMPTS = [
+  "Not the helper you want, but the helper you have",
+  "Naughty / Nice / Tried My Best",
+  "That sounds dangerous. What time?",
+  "Santa knows what I did",
+  "You better watch out! Yeah that’s a threat",
+  "My favorite Christmas tradition is ___",
+  "This year I’m grateful for ___",
+  "This year I’m most proud of myself for ___",
+  "In my own world",
+  "Not mad, just gaming",
+  "STIMMIN’ FOR THE HOLIDAYS",
+  "Overstim’d",
+  "Dual-screening like a pro",
+  "Unmedicated and making it everyone’s problem",
+  "Here to rizz ’em with the ’tism",
+  "(I have) 80 HD",
+  "I’m shaky - send sugar!",
+  "Cookies for dinner",
+  "I’m about to show you guys the dark side of egg nog",
+  "Texas Roadhouse roll count: ___",
+  "My other ride is ___",
+  "Ask me about my ___",
+  "Powered by ___ and ___",
+  "YAAHAA! YOU FOUND ME! (draw your favorite Korok)",
+  "Cookie count: ___",
+  "Naughty 😈 or Nice 😇"
+];
+
 /* =========================
    2.) STORAGE HELPERS
    F: Section Data Helpers (JSON)
@@ -217,6 +251,37 @@ function renderRules(appContent) {
 }
 
 /* =========================
+   5.) DASHBOARD HELPERS
+   A: Progress Status (MVP)
+========================= */
+function getSectionAStatus() {
+  const raw = getStored(STORAGE_KEYS.sectionA);
+  if (!raw) return { label: 'Not started', tone: 'neutral', icon: '' };
+
+  const defaultData = { selectedPromptIds: [], customPrompts: [], writerChoice: 'self' };
+  const data = getStoredJSON(STORAGE_KEYS.sectionA, defaultData);
+
+  const hasPrompt = Array.isArray(data.selectedPromptIds) && data.selectedPromptIds.length > 0;
+  const hasCustom = Array.isArray(data.customPrompts) && data.customPrompts.some(v => String(v).trim().length > 0);
+  const isComplete = hasPrompt || hasCustom;
+
+  if (isComplete) return { label: 'Complete', tone: 'good', icon: '✓' };
+  return { label: 'In progress', tone: 'warn', icon: '•' };
+}
+
+function renderTileStatus(status) {
+  const badge = status.icon
+    ? `<span class="tile__badge tile__badge--${status.tone}">${status.icon}</span>`
+    : '';
+  return `${badge}${status.label}`;
+}
+
+function getTileStatusForScreen(screen) {
+  if (screen === 'section-a') return getSectionAStatus();
+  return { label: 'Not started', tone: 'neutral', icon: '' };
+}
+
+/* =========================
    5.) SCREEN RENDERER
    C: Dashboard (Tiles)
 ========================= */
@@ -232,6 +297,10 @@ function renderDashboard(appContent) {
     displayName = match ? match.displayName : null;
   }
 
+  const sectionStatuses = Object.fromEntries(
+    SECTIONS.map(s => [s.screen, getTileStatusForScreen(s.screen)])
+  );
+
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
       <h1>Welcome${displayName ? `, ${displayName}` : ''}!</h1>
@@ -242,7 +311,7 @@ function renderDashboard(appContent) {
           <button class="tile" data-screen="${s.screen}" type="button">
             <div class="tile__kicker">${s.id}.</div>
             <div class="tile__title">${s.title}</div>
-            <div class="tile__status">Not started</div>
+            <div class="tile__status">${renderTileStatus(sectionStatuses[s.screen])}</div>
           </button>
         `).join('')}
       </div>
@@ -347,11 +416,178 @@ function renderSectionPlaceholder(appContent, sectionId, title) {
   if (back) back.addEventListener('click', () => navigate('dashboard'));
 }
 
-function renderSectionA(appContent) { return renderSectionPlaceholder(appContent, 'A', 'Speech Bubble Photo Props'); }
+/* =========================
+   5.) SCREEN RENDERER
+   E: Section A (Speech Bubble Photo Props)
+========================= */
+function renderSectionA(appContent) {
+  const defaultData = {
+    selectedPromptIds: [],     // array of string ids
+    customPrompts: [],         // array of strings (max 3)
+    writerChoice: 'self'       // 'self' | 'uncle_mark'
+  };
+
+  let data = getStoredJSON(STORAGE_KEYS.sectionA, defaultData);
+
+  // Build IDs for prompt bank (stable)
+  const promptItems = SECTION_A_PROMPTS.map((text, idx) => ({
+    id: `a_${idx}`,
+    text
+  }));
+
+  appContent.innerHTML = `
+    <section class="screen screen--section">
+      <div class="section-head">
+        <h1>A. Speech Bubble Photo Props</h1>
+        <p class="muted">
+          Soft-claim the ones you like. We’ll use this to curate ideas for the photo prop.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2 class="h2">Who should write the sign?</h2>
+        <label class="radio-row">
+          <input type="radio" name="writerChoice" value="self" ${data.writerChoice === 'self' ? 'checked' : ''}/>
+          <span>I will draw / write it myself</span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="writerChoice" value="uncle_mark" ${data.writerChoice === 'uncle_mark' ? 'checked' : ''}/>
+          <span>I would like (Uncle) Mark Allen to do it</span>
+        </label>
+      </div>
+
+      <div class="card">
+        <div class="card__title-row">
+          <h2 class="h2">Prompt ideas</h2>
+          <button class="btn btn--ghost" id="a-clear" type="button">Clear selections</button>
+        </div>
+
+        <div class="prompt-list">
+          ${promptItems.map(p => {
+            const checked = data.selectedPromptIds.includes(p.id) ? 'checked' : '';
+            return `
+              <label class="prompt-row">
+                <input type="checkbox" data-prompt-id="${p.id}" ${checked}/>
+                <span>${p.text}</span>
+              </label>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title-row">
+          <h2 class="h2">Add up to 3 custom prompts</h2>
+          <button class="btn btn--primary" id="a-add-custom" type="button">+ Add</button>
+        </div>
+
+        <div id="a-custom-wrap" class="custom-wrap">
+          ${data.customPrompts.map((val, i) => `
+            <div class="custom-row">
+              <input class="input" type="text" maxlength="80" data-custom-index="${i}" value="${escapeHtml(val)}" />
+              <button class="btn btn--ghost" data-remove-custom="${i}" type="button">Remove</button>
+            </div>
+          `).join('')}
+        </div>
+
+        <p class="muted small">Tip: keep it short so it fits on the sign.</p>
+      </div>
+
+      <div class="rules-actions" style="margin-top:16px;">
+        <button class="btn btn--ghost" id="back-to-dashboard" type="button">Back to Dashboard</button>
+      </div>
+    </section>
+  `;
+
+  // --- helpers (screen-scoped) ---
+  function save(next) {
+    data = next;
+    setStoredJSON(STORAGE_KEYS.sectionA, next);
+  }
+
+  // Writer choice
+  document.querySelectorAll('input[name="writerChoice"]').forEach(r => {
+    r.addEventListener('change', (e) => {
+      const next = { ...data, writerChoice: e.target.value };
+      save(next);
+    });
+  });
+
+  // Checkbox selections
+  document.querySelectorAll('[data-prompt-id]').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const id = e.target.dataset.promptId;
+      const selected = new Set(data.selectedPromptIds);
+
+      if (e.target.checked) selected.add(id);
+      else selected.delete(id);
+
+      const next = { ...data, selectedPromptIds: Array.from(selected) };
+      save(next);
+    });
+  });
+
+  // Clear selections
+  document.getElementById('a-clear').addEventListener('click', () => {
+    const next = { ...data, selectedPromptIds: [] };
+    save(next);
+    navigate('section-a'); // re-render cleanly
+  });
+
+  // Add custom (max 3)
+  document.getElementById('a-add-custom').addEventListener('click', () => {
+    if (data.customPrompts.length >= 3) {
+      alert('Max 3 custom prompts 🙂');
+      return;
+    }
+    const next = { ...data, customPrompts: [...data.customPrompts, ''] };
+    save(next);
+    navigate('section-a');
+  });
+
+  // Edit custom prompt
+  document.querySelectorAll('[data-custom-index]').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const idx = Number(e.target.dataset.customIndex);
+      const copy = [...data.customPrompts];
+      copy[idx] = e.target.value;
+      const next = { ...data, customPrompts: copy };
+      save(next);
+    });
+  });
+
+  // Remove custom
+  document.querySelectorAll('[data-remove-custom]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = Number(e.currentTarget.dataset.removeCustom);
+      const copy = data.customPrompts.filter((_, i) => i !== idx);
+      const next = { ...data, customPrompts: copy };
+      save(next);
+      navigate('section-a');
+    });
+  });
+
+  // Back
+  document.getElementById('back-to-dashboard').addEventListener('click', () => navigate('dashboard'));
+}
+
 function renderSectionB(appContent) { return renderSectionPlaceholder(appContent, 'B', 'Most Likely To…'); }
 function renderSectionC(appContent) { return renderSectionPlaceholder(appContent, 'C', 'Traditions & Memory'); }
 function renderSectionD(appContent) { return renderSectionPlaceholder(appContent, 'D', 'Draw / Sketch'); }
 function renderSectionE(appContent) { return renderSectionPlaceholder(appContent, 'E', 'Quistmas Quiplash'); }
+
+/* =========================
+   5.) SCREEN RENDERER
+   Z: Tiny HTML Escaper
+========================= */
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
 
 /* =========================
    BASIC ROUTER
