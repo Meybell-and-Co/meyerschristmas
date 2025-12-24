@@ -246,6 +246,10 @@ function renderFamilyPicker(appContent) {
       appState.player.personId = personId;
       setStored(STORAGE_KEYS.personId, personId);
       navigate('dashboard');
+
+  document.getElementById('reset-app').addEventListener('click', resetAppData);
+
+       
     });
   });
 
