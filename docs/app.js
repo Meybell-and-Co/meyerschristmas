@@ -47,9 +47,9 @@ const FAMILY_BY_SURNAME = {
     { personId: 'meyers_veronica', displayName: 'Granny Mars' },
   ],
   Mueting: [
-    { personId: 'mueting_sarah', displayName: 'Sarah' },
+    { personId: 'mueting_sarah', displayName: 'Aunt Sarah' },
     { personId: 'mueting_isaac', displayName: 'Isaac' },
-    { personId: 'mueting_peyton', displayName: 'Greyson' },
+    { personId: 'mueting_greyson', displayName: 'Greyson' },
     { personId: 'mueting_peyton', displayName: 'Peyton' },
     { personId: 'mueting_kaiden', displayName: 'Kaiden' }
   ],
