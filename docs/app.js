@@ -310,9 +310,9 @@ function renderDashboard(appContent) {
     displayName = match ? match.displayName : null;
   }
 
-  const sectionStatuses = Object.fromEntries(
-    SECTIONS.map(s => [s.screen, getTileStatusForScreen(s.screen)])
-  );
+const sectionStatuses = Object.fromEntries(
+  SECTIONS.map(s => [s.screen, getTileStatusForScreen(s.screen, personId)])
+);
 
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
@@ -431,22 +431,22 @@ function renderSectionPlaceholder(appContent, sectionId, title) {
 
 function renderSectionA(appContent) {
   const personId = appState.player.personId;
+  if (!personId) return navigate('family');
 
-  // If someone deep-linked without choosing a person, bounce them back.
-  if (!personId) {
-    alert('Pick your name first 🙂');
-    return navigate('family');
-  }
-
-  const storageKey = getSectionAKey(personId);
+  const storageKey = getSectionAKey(personId); // uses mcq_${personId}_section_a
 
   const defaultData = {
-    selectedPromptIds: [],     // array of string ids
-    customPrompts: [],         // array of strings (max 3)
-    writerChoice: 'self'       // 'self' | 'uncle_mark'
+    selectedPromptIds: [],
+    customPrompts: [],
+    writerChoice: 'self'
   };
 
   let data = getStoredJSON(storageKey, defaultData);
+
+  function save(next) {
+    data = next;
+    setStoredJSON(storageKey, next);
+  }
 
   // Build IDs for prompt bank (stable)
   const promptItems = SECTION_A_PROMPTS.map((text, idx) => ({
