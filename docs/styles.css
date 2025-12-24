@@ -89,3 +89,46 @@ html, body {
   text-align: center;
   padding-top: 4rem;
 }
+
+.surname-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn{
+  font:inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0,0,0,0.10);
+  padding: 12px 14px;
+  cursor:pointer;
+  background: white;
+}
+
+.btn--tile{
+  text-align:center;
+  font-weight:600;
+}
+
+.btn--primary{
+  background: var(--color-accent);
+  color: white;
+  border-color: transparent;
+}
+
+.btn--ghost{
+  background: transparent;
+}
+
+.rules-actions{
+  display:flex;
+  gap:12px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+
