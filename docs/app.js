@@ -22,6 +22,11 @@ const STORAGE_KEYS = {
   playerId: 'mcq_playerId',
   surname: 'mcq_surname',
   rulesOk: 'mcq_rules_ok'
+  personId: 'mcq_personId'
+
+const savedPersonId = getStored(STORAGE_KEYS.personId);
+if (savedPersonId) appState.player.personId = savedPersonId;
+
 };
 
 /* =========================
@@ -35,6 +40,43 @@ function getStored(key) {
 function setStored(key, value) {
   localStorage.setItem(key, value);
 }
+
+/* =========================
+   2.) STORAGE HELPERS
+   C: Family Data (placeholder)
+========================= */
+const FAMILY_BY_SURNAME = {
+  Meyers: [
+    { personId: 'meyers_mark', displayName: 'Grandpa Mars' },
+    { personId: 'meyers_veronica', displayName: 'Granny Mars' },
+  ],
+  Mueting: [
+    { personId: 'mueting_sarah', displayName: 'Sarah' }
+     { personId: 'mueting_isaac', displayName: 'Isaac' }
+{ personId: 'mueting_peyton', displayName: 'Greyson' }
+{ personId: 'mueting_peyton', displayName: 'Peyton' }
+{ personId: 'mueting_kaiden', displayName: 'Kaiden' }
+  ],
+  Meybell: [
+    { personId: 'meybell_uncle_mark', displayName: 'Uncle Mark' }
+     { personId: 'meybell_uncle_larry', displayName: 'Uncle Larry' }
+  ],
+  Brase: [
+    { personId: 'brase_barbara', displayName: 'Aunt Barbara' },
+{ personId: 'brase_craig',   displayName: 'Uncle Craig' },
+{ personId: 'brase_cyrus',   displayName: 'Cyrus' },
+{ personId: 'brase_xavier',  displayName: 'Xavier' },
+{ personId: 'brase_aurora',  displayName: 'Aurora' }
+
+  ],
+  Tryon: [
+{ personId: 'tryon_david',     displayName: 'Uncle David' },
+{ personId: 'tryon_christina', displayName: 'Aunt Christina' },
+{ personId: 'tryon_nori',      displayName: 'Nori' },
+{ personId: 'tryon_edward',    displayName: 'Edward' }
+  ]
+};
+
 
 /* =========================
    3.) PLAYER ID
@@ -123,7 +165,7 @@ function renderRules(appContent) {
     setStored(STORAGE_KEYS.rulesOk, 'true');
 
     // Next screen placeholder (we’ll add Family Picker next)
-    navigate('dashboard');
+    navigate('family');
   });
 
   document.getElementById('rules-decline').addEventListener('click', () => {
@@ -160,6 +202,47 @@ function renderDashboard(appContent) {
 }
 
 /* =========================
+   5.) SCREEN RENDERER
+   D: Family Picker (names now, photos later)
+========================= */
+function renderFamilyPicker(appContent) {
+  const surname = appState.player.surname;
+  const list = FAMILY_BY_SURNAME[surname] || [];
+
+  appContent.innerHTML = `
+    <section class="screen screen--family">
+      <h1>Who are you?</h1>
+      <p class="muted">Pick your name (photos coming later).</p>
+
+      <div class="family-grid">
+        ${list.map(p => `
+          <button class="btn btn--tile" data-person-id="${p.personId}">
+            ${p.displayName}
+          </button>
+        `).join('')}
+      </div>
+
+      <div class="rules-actions" style="margin-top:16px;">
+        <button class="btn btn--ghost" id="back-to-dashboard">Back</button>
+      </div>
+    </section>
+  `;
+
+  document.querySelectorAll('[data-person-id]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const personId = e.currentTarget.dataset.personId;
+      appState.player.personId = personId;
+      setStored(STORAGE_KEYS.personId, personId);
+      navigate('dashboard');
+    });
+  });
+
+  document.getElementById('back-to-dashboard').addEventListener('click', () => {
+    navigate('dashboard');
+  });
+}
+
+/* =========================
    BASIC ROUTER
 ========================= */
 function renderScreen(screenId) {
@@ -170,6 +253,8 @@ function renderScreen(screenId) {
   if (screenId === 'landing') return renderLanding(appContent);
   if (screenId === 'rules') return renderRules(appContent);
   if (screenId === 'dashboard') return renderDashboard(appContent);
+  if (screenId === 'family') return renderFamilyPicker(appContent);
+
 
   // Fallback (kept from your original scaffold)
   appContent.innerHTML = `
@@ -197,10 +282,10 @@ function restoreFromStorage() {
    B: Choose first screen
 ========================= */
 function getStartScreen() {
-  // If they already agreed to rules, skip the TOU gate
-  if (appState.player.surname && !appState.player.hasAgreedToRules) return 'rules';
-  if (appState.player.surname && appState.player.hasAgreedToRules) return 'dashboard';
-  return 'landing';
+  if (!appState.player.surname) return 'landing';
+  if (!appState.player.hasAgreedToRules) return 'rules';
+  if (!appState.player.personId) return 'family';
+  return 'dashboard';
 }
 
 /* =========================
