@@ -1,0 +1,91 @@
+/* =========================
+   CSS RESET (light)
+========================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #faf9f7;
+  color: #1f2d2b;
+}
+
+/* =========================
+   DESIGN TOKENS (early!)
+========================= */
+:root {
+  --color-bg: #faf9f7;
+  --color-ink: #1f2d2b;
+  --color-accent: #c83d4a;
+  --color-evergreen: #2f5d50;
+  --color-cream: #fffdf8;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
+  --header-height: 64px;
+}
+
+/* =========================
+   APP SHELL
+========================= */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.app__header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  background: var(--color-cream);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.app__brand {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Avatar */
+.avatar-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ddd;
+}
+
+/* Main content */
+.app__content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+/* =========================
+   SCREENS
+========================= */
+.screen {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.screen--loading {
+  text-align: center;
+  padding-top: 4rem;
+}
