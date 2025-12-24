@@ -47,29 +47,29 @@ const FAMILY_BY_SURNAME = {
     { personId: 'meyers_veronica', displayName: 'Granny Mars' },
   ],
   Mueting: [
-    { personId: 'mueting_sarah', displayName: 'Sarah' }
-     { personId: 'mueting_isaac', displayName: 'Isaac' }
-{ personId: 'mueting_peyton', displayName: 'Greyson' }
-{ personId: 'mueting_peyton', displayName: 'Peyton' }
-{ personId: 'mueting_kaiden', displayName: 'Kaiden' }
+    { personId: 'mueting_sarah', displayName: 'Sarah' },
+    { personId: 'mueting_isaac', displayName: 'Isaac' },
+    { personId: 'mueting_peyton', displayName: 'Greyson' },
+    { personId: 'mueting_peyton', displayName: 'Peyton' },
+    { personId: 'mueting_kaiden', displayName: 'Kaiden' }
   ],
   Meybell: [
-    { personId: 'meybell_uncle_mark', displayName: 'Uncle Mark' }
-     { personId: 'meybell_uncle_larry', displayName: 'Uncle Larry' }
+    { personId: 'meybell_uncle_mark', displayName: 'Uncle Mark' },
+    { personId: 'meybell_uncle_larry', displayName: 'Uncle Larry' }
   ],
   Brase: [
     { personId: 'brase_barbara', displayName: 'Aunt Barbara' },
-{ personId: 'brase_craig',   displayName: 'Uncle Craig' },
-{ personId: 'brase_cyrus',   displayName: 'Cyrus' },
-{ personId: 'brase_xavier',  displayName: 'Xavier' },
-{ personId: 'brase_aurora',  displayName: 'Aurora' }
+    { personId: 'brase_craig',   displayName: 'Uncle Craig' },
+    { personId: 'brase_cyrus',   displayName: 'Cyrus' },
+    { personId: 'brase_xavier',  displayName: 'Xavier' },
+    { personId: 'brase_aurora',  displayName: 'Aurora' }
 
   ],
   Tryon: [
-{ personId: 'tryon_david',     displayName: 'Uncle David' },
-{ personId: 'tryon_christina', displayName: 'Aunt Christina' },
-{ personId: 'tryon_nori',      displayName: 'Nori' },
-{ personId: 'tryon_edward',    displayName: 'Edward' }
+    { personId: 'tryon_david',     displayName: 'Uncle David' },
+    { personId: 'tryon_christina', displayName: 'Aunt Christina' },
+    { personId: 'tryon_nori',      displayName: 'Nori' },
+    { personId: 'tryon_edward',    displayName: 'Edward' }
   ]
 };
 
