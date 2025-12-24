@@ -143,3 +143,57 @@ html, body {
   flex-wrap:wrap;
 }
 
+/* =========================
+   TILES
+========================= */
+
+.tile-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+
+.tile{
+  text-align:left;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0,0,0,0.10);
+  background: white;
+  padding: 14px 14px 12px;
+  cursor:pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.btn:hover{
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.btn:active{
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.tile__kicker{
+  font-weight:700;
+  opacity:0.65;
+  margin-bottom:6px;
+}
+
+.tile__title{
+  font-weight:800;
+  font-size:1.05rem;
+  line-height:1.2;
+}
+
+.tile__status{
+  margin-top:8px;
+  font-size:0.9rem;
+  opacity:0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .tile { transition: none; }
+  .btn:hover, .tile:hover { transform: none; }
+}
