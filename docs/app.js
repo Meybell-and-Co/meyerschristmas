@@ -266,7 +266,6 @@ function renderFamilyPicker(appContent) {
   document.getElementById('back-to-dashboard').addEventListener('click', () => {
     navigate('dashboard');
   });
-}
 
 /* =========================
    BASIC ROUTER
