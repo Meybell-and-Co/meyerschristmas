@@ -102,7 +102,6 @@ const SECTIONS = [
   { id: 'E', title: 'Quistmas Quiplash',         screen: 'section-e' }
 ];
 
-
 /* =========================
    2.) CONTENT
    A: Speech Bubble Prompt Bank
@@ -135,6 +134,19 @@ const SECTION_A_PROMPTS = [
   "Cookie count: ___",
   "Naughty 😈 or Nice 😇"
 ];
+
+/* =========================
+   5.) SCREEN RENDERER
+   Z: Tiny HTML Escaper
+========================= */
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
 
 /* =========================
    2.) STORAGE HELPERS
@@ -254,18 +266,29 @@ function renderRules(appContent) {
    5.) DASHBOARD HELPERS
    A: Progress Status (MVP)
 ========================= */
-function getSectionAStatus() {
-  const raw = getStored(STORAGE_KEYS.sectionA);
-  if (!raw) return { label: 'Not started', tone: 'neutral', icon: '' };
 
+// Person-scoped storage key for Section A
+function getSectionAKey(personId) {
+  return `mcq_${personId}_section_a`;
+}
+
+function getSectionAStatus(personId) {
+  if (!personId) return { label: 'Not started', tone: 'neutral', icon: '' };
+
+  const key = getSectionAKey(personId);
   const defaultData = { selectedPromptIds: [], customPrompts: [], writerChoice: 'self' };
-  const data = getStoredJSON(STORAGE_KEYS.sectionA, defaultData);
 
-  const hasPrompt = Array.isArray(data.selectedPromptIds) && data.selectedPromptIds.length > 0;
-  const hasCustom = Array.isArray(data.customPrompts) && data.customPrompts.some(v => String(v).trim().length > 0);
-  const isComplete = hasPrompt || hasCustom;
+  // null fallback lets us detect "key does not exist"
+  const data = getStoredJSON(key, null);
+  if (!data) return { label: 'Not started', tone: 'neutral', icon: '' };
 
-  if (isComplete) return { label: 'Complete', tone: 'good', icon: '✓' };
+  const selected = Array.isArray(data.selectedPromptIds) ? data.selectedPromptIds : [];
+  const customs  = Array.isArray(data.customPrompts) ? data.customPrompts : [];
+
+  const hasPrompt = selected.length > 0;
+  const hasCustom = customs.some(v => String(v).trim().length > 0);
+
+  if (hasPrompt || hasCustom) return { label: 'Complete', tone: 'good', icon: '✓' };
   return { label: 'In progress', tone: 'warn', icon: '•' };
 }
 
@@ -276,8 +299,8 @@ function renderTileStatus(status) {
   return `${badge}${status.label}`;
 }
 
-function getTileStatusForScreen(screen) {
-  if (screen === 'section-a') return getSectionAStatus();
+function getTileStatusForScreen(screen, personId) {
+  if (screen === 'section-a') return getSectionAStatus(personId);
   return { label: 'Not started', tone: 'neutral', icon: '' };
 }
 
@@ -297,10 +320,6 @@ function renderDashboard(appContent) {
     displayName = match ? match.displayName : null;
   }
 
-  const sectionStatuses = Object.fromEntries(
-    SECTIONS.map(s => [s.screen, getTileStatusForScreen(s.screen)])
-  );
-
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
       <h1>Welcome${displayName ? `, ${displayName}` : ''}!</h1>
@@ -311,7 +330,7 @@ function renderDashboard(appContent) {
           <button class="tile" data-screen="${s.screen}" type="button">
             <div class="tile__kicker">${s.id}.</div>
             <div class="tile__title">${s.title}</div>
-            <div class="tile__status">${renderTileStatus(sectionStatuses[s.screen])}</div>
+            <div class="tile__status">${renderTileStatus(getTileStatusForScreen(s.screen, personId))}</div>
           </button>
         `).join('')}
       </div>
@@ -416,18 +435,24 @@ function renderSectionPlaceholder(appContent, sectionId, title) {
   if (back) back.addEventListener('click', () => navigate('dashboard'));
 }
 
-/* =========================
-   5.) SCREEN RENDERER
-   E: Section A (Speech Bubble Photo Props)
-========================= */
 function renderSectionA(appContent) {
+  const personId = appState.player.personId;
+
+  // If someone deep-linked without choosing a person, bounce them back.
+  if (!personId) {
+    alert('Pick your name first 🙂');
+    return navigate('family');
+  }
+
+  const storageKey = getSectionAKey(personId);
+
   const defaultData = {
     selectedPromptIds: [],     // array of string ids
     customPrompts: [],         // array of strings (max 3)
     writerChoice: 'self'       // 'self' | 'uncle_mark'
   };
 
-  let data = getStoredJSON(STORAGE_KEYS.sectionA, defaultData);
+  let data = getStoredJSON(storageKey, defaultData);
 
   // Build IDs for prompt bank (stable)
   const promptItems = SECTION_A_PROMPTS.map((text, idx) => ({
@@ -502,7 +527,7 @@ function renderSectionA(appContent) {
   // --- helpers (screen-scoped) ---
   function save(next) {
     data = next;
-    setStoredJSON(STORAGE_KEYS.sectionA, next);
+    setStoredJSON(storageKey, next);
   }
 
   // Writer choice
@@ -570,24 +595,10 @@ function renderSectionA(appContent) {
   // Back
   document.getElementById('back-to-dashboard').addEventListener('click', () => navigate('dashboard'));
 }
-
 function renderSectionB(appContent) { return renderSectionPlaceholder(appContent, 'B', 'Most Likely To…'); }
 function renderSectionC(appContent) { return renderSectionPlaceholder(appContent, 'C', 'Traditions & Memory'); }
 function renderSectionD(appContent) { return renderSectionPlaceholder(appContent, 'D', 'Draw / Sketch'); }
 function renderSectionE(appContent) { return renderSectionPlaceholder(appContent, 'E', 'Quistmas Quiplash'); }
-
-/* =========================
-   5.) SCREEN RENDERER
-   Z: Tiny HTML Escaper
-========================= */
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 /* =========================
    BASIC ROUTER
