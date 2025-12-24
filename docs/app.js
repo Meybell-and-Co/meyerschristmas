@@ -21,12 +21,12 @@ const appState = {
 const STORAGE_KEYS = {
   playerId: 'mcq_playerId',
   surname: 'mcq_surname',
-  rulesOk: 'mcq_rules_ok'
+  rulesOk: 'mcq_rules_ok',
   personId: 'mcq_personId'
+};
 
 const savedPersonId = getStored(STORAGE_KEYS.personId);
 if (savedPersonId) appState.player.personId = savedPersonId;
-
 };
 
 /* =========================
@@ -272,9 +272,11 @@ function renderScreen(screenId) {
 function restoreFromStorage() {
   const savedSurname = getStored(STORAGE_KEYS.surname);
   const rulesOk = getStored(STORAGE_KEYS.rulesOk) === 'true';
+  const savedPersonId = getStored(STORAGE_KEYS.personId);
 
   if (savedSurname) appState.player.surname = savedSurname;
   if (rulesOk) appState.player.hasAgreedToRules = true;
+  if (savedPersonId) appState.player.personId = savedPersonId;
 }
 
 /* =========================
