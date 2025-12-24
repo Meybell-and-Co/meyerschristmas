@@ -25,10 +25,6 @@ const STORAGE_KEYS = {
   personId: 'mcq_personId'
 };
 
-const savedPersonId = getStored(STORAGE_KEYS.personId);
-if (savedPersonId) appState.player.personId = savedPersonId;
-};
-
 /* =========================
    2.) STORAGE HELPERS
    B: Get/Set Helpers
