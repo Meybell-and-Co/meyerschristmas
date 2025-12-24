@@ -193,7 +193,7 @@ function renderDashboard(appContent) {
 
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
-      <h1>Welcome, ${surname}!</h1>
+      <h1>Welcome, ${personId}!</h1>
       <p>Next up: choose your family member (photo picker), then sections A–E.</p>
 
       <div class="callout">
