@@ -73,6 +73,22 @@ const FAMILY_BY_SURNAME = {
   ]
 };
 
+/* =========================
+   2.) STORAGE HELPERS
+   D: Reset Helpers (UAT)
+========================= */
+function resetAppData() {
+  localStorage.removeItem(STORAGE_KEYS.playerId);
+  localStorage.removeItem(STORAGE_KEYS.surname);
+  localStorage.removeItem(STORAGE_KEYS.rulesOk);
+  localStorage.removeItem(STORAGE_KEYS.personId);
+
+  // Optional: in case anything else ever lands here
+  // localStorage.clear();
+  // sessionStorage.clear();
+
+  window.location.reload();
+}
 
 /* =========================
    3.) PLAYER ID
