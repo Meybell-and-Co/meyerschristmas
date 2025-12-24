@@ -152,25 +152,28 @@ function renderLanding(appContent) {
    5.) SCREEN RENDERER
    B: House Rules (TOU)
 ========================= */
-function renderRules(appContent) {
+function renderFamilyPicker(appContent) {
   appContent.innerHTML = `
-    <section class="screen screen--rules">
-      <h1>House Rules</h1>
-      <p class="muted">(How We Keep This Fun)</p>
+    <section class="screen screen--family">
+      <h1>Who are you?</h1>
+      <p class="muted">Pick your name (photos coming later).</p>
 
-      <ul class="rules-list">
-        <li>You can pass or recuse yourself on any prompt — no questions, no consequences.</li>
-        <li>Be charitable in your responses; if you’re named, assume it’s coming from a place of love.</li>
-        <li>Be sensitive to little ears (PG-13 energy).</li>
-        <li>No shade or digs — be funny, not Grinchy.</li>
-      </ul>
+      <div class="family-grid">
+        ${list.map(p => `
+          <button class="btn btn--tile" data-person-id="${p.personId}">
+            ${p.displayName}
+          </button>
+        `).join('')}
+      </div>
 
-      <div class="rules-actions">
-        <button class="btn btn--primary" id="rules-agree">I Agree</button>
-        <button class="btn btn--ghost" id="rules-decline">Decline</button>
+      <!-- 👇 THIS is where Reset goes -->
+      <div class="rules-actions" style="margin-top:16px;">
+        <button class="btn btn--ghost" id="back-to-dashboard">Back</button>
+        <button class="btn btn--ghost" id="reset-app">Reset</button>
       </div>
     </section>
   `;
+}
 
   document.getElementById('rules-agree').addEventListener('click', () => {
     appState.player.hasAgreedToRules = true;
