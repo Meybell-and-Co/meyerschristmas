@@ -190,25 +190,36 @@ function renderRules(appContent) {
 ========================= */
 function renderDashboard(appContent) {
   const surname = appState.player.surname || 'friend';
+  const personId = appState.player.personId || null;
+
+  // Optional: find display name from FAMILY_BY_SURNAME
+  let displayName = appState.player.displayName;
+  if (!displayName && personId) {
+    const list = FAMILY_BY_SURNAME[surname] || [];
+    const match = list.find(p => p.personId === personId);
+    displayName = match ? match.displayName : null;
+  }
 
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
-      <h1>Welcome, ${personId}!</h1>
-      <p>Next up: choose your family member (photo picker), then sections A–E.</p>
+      <h1>Welcome${displayName ? `, ${displayName}` : ''}!</h1>
+      <p class="muted">Next up: sections A–E.</p>
 
       <div class="callout">
-        <strong>Status:</strong> base routing is working ✅
+        <strong>Status:</strong> routing is working ✅<br/>
+        <strong>Surname:</strong> ${surname}<br/>
+        <strong>Person:</strong> ${displayName || '(not set)'}
       </div>
 
       <div class="rules-actions" style="margin-top: 16px;">
-        <button class="btn btn--tile" id="go-landing">Back to Landing</button>
+        <button class="btn btn--tile" id="go-landing" type="button">Back to Landing</button>
+        <button class="btn btn--ghost" id="go-family" type="button">Change Person</button>
       </div>
     </section>
   `;
 
-  document.getElementById('go-landing').addEventListener('click', () => {
-    navigate('landing');
-  });
+  document.getElementById('go-landing').addEventListener('click', () => navigate('landing'));
+  document.getElementById('go-family').addEventListener('click', () => navigate('family'));
 }
 
 /* =========================
@@ -218,7 +229,7 @@ function renderDashboard(appContent) {
 function renderFamilyPicker(appContent) {
   const surname = appState.player.surname;
   const list = FAMILY_BY_SURNAME[surname] || [];
-
+  
   appContent.innerHTML = `
     <section class="screen screen--family">
       <h1>Who are you?</h1>
@@ -252,6 +263,7 @@ function renderFamilyPicker(appContent) {
     btn.addEventListener('click', (e) => {
       const personId = e.currentTarget.dataset.personId;
       appState.player.personId = personId;
+      appState.player.displayName = e.currentTarget.textContent.trim();
       setStored(STORAGE_KEYS.personId, personId);
       navigate('dashboard');
     });
