@@ -44,7 +44,7 @@ function setStored(key, value) {
 const FAMILY_BY_SURNAME = {
   Meyers: [
     { personId: 'meyers_mark', displayName: 'Grandpa Mars' },
-    { personId: 'meyers_veronica', displayName: 'Granny Mars' },
+    { personId: 'meyers_veronica', displayName: 'Granny Mars' }
   ],
   Mueting: [
     { personId: 'mueting_sarah', displayName: 'Aunt Sarah' },
@@ -89,6 +89,23 @@ function resetAppData() {
 
   window.location.reload();
 }
+
+/* =========================
+   2.) STORAGE HELPERS
+   E: Section Definitions (Tiles)
+========================= */
+const SECTIONS = [
+  { id: 'A', title: 'Speech Bubble Photo Props', screen: 'section-a' },
+  { id: 'B', title: 'Most Likely To…',           screen: 'section-b' },
+  { id: 'C', title: 'Traditions & Memory',       screen: 'section-c' },
+  { id: 'D', title: 'Draw / Sketch',             screen: 'section-d' },
+  { id: 'E', title: 'Quistmas Quiplash',         screen: 'section-e' }
+];
+
+/* =========================
+   3.) PLAYER ID
+   A: Ensure we have one
+========================= */
 
 function ensurePlayerId() {
   let id = getStored(STORAGE_KEYS.playerId);
@@ -183,16 +200,15 @@ function renderRules(appContent) {
   });
 }
 
-
 /* =========================
    5.) SCREEN RENDERER
-   C: Dashboard (Placeholder)
+   C: Dashboard (Tiles)
 ========================= */
 function renderDashboard(appContent) {
   const surname = appState.player.surname || 'friend';
   const personId = appState.player.personId || null;
 
-  // Optional: find display name from FAMILY_BY_SURNAME
+  // Find display name (optional but nice)
   let displayName = appState.player.displayName;
   if (!displayName && personId) {
     const list = FAMILY_BY_SURNAME[surname] || [];
@@ -203,23 +219,34 @@ function renderDashboard(appContent) {
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
       <h1>Welcome${displayName ? `, ${displayName}` : ''}!</h1>
-      <p class="muted">Next up: sections A–E.</p>
+      <p class="muted">Pick a section. We’ll save as you go.</p>
 
-      <div class="callout">
-        <strong>Status:</strong> routing is working ✅<br/>
-        <strong>Surname:</strong> ${surname}<br/>
-        <strong>Person:</strong> ${displayName || '(not set)'}
+      <div class="tile-grid">
+        ${SECTIONS.map(s => `
+          <button class="tile" data-screen="${s.screen}" type="button">
+            <div class="tile__kicker">${s.id}.</div>
+            <div class="tile__title">${s.title}</div>
+            <div class="tile__status">Not started</div>
+          </button>
+        `).join('')}
       </div>
 
-      <div class="rules-actions" style="margin-top: 16px;">
-        <button class="btn btn--tile" id="go-landing" type="button">Back to Landing</button>
+      <div class="rules-actions" style="margin-top:16px;">
         <button class="btn btn--ghost" id="go-family" type="button">Change Person</button>
+        <button class="btn btn--ghost" id="reset-app" type="button">Reset</button>
       </div>
     </section>
   `;
 
-  document.getElementById('go-landing').addEventListener('click', () => navigate('landing'));
+  // Tile navigation
+  document.querySelectorAll('[data-screen]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      navigate(e.currentTarget.dataset.screen);
+    });
+  });
+
   document.getElementById('go-family').addEventListener('click', () => navigate('family'));
+  document.getElementById('reset-app').addEventListener('click', resetAppData);
 }
 
 /* =========================
@@ -283,20 +310,53 @@ function renderFamilyPicker(appContent) {
 }
 
 /* =========================
+   5.) SCREEN RENDERER
+   E: Section Screens (Placeholders)
+========================= */
+function renderSectionPlaceholder(appContent, sectionId, title) {
+  appContent.innerHTML = `
+    <section class="screen screen--section">
+      <h1>${sectionId}. ${title}</h1>
+      <p class="muted">Placeholder screen ✅</p>
+
+      <div class="rules-actions" style="margin-top:16px;">
+        <button class="btn btn--ghost" id="back-to-dashboard" type="button">
+          Back to Dashboard
+        </button>
+      </div>
+    </section>
+  `;
+
+  const back = document.getElementById('back-to-dashboard');
+  if (back) back.addEventListener('click', () => navigate('dashboard'));
+}
+
+function renderSectionA(appContent) { return renderSectionPlaceholder(appContent, 'A', 'Speech Bubble Photo Props'); }
+function renderSectionB(appContent) { return renderSectionPlaceholder(appContent, 'B', 'Most Likely To…'); }
+function renderSectionC(appContent) { return renderSectionPlaceholder(appContent, 'C', 'Traditions & Memory'); }
+function renderSectionD(appContent) { return renderSectionPlaceholder(appContent, 'D', 'Draw / Sketch'); }
+function renderSectionE(appContent) { return renderSectionPlaceholder(appContent, 'E', 'Quistmas Quiplash'); }
+
+/* =========================
    BASIC ROUTER
 ========================= */
 function renderScreen(screenId) {
   const appContent = document.getElementById('app-content');
   appState.ui.currentScreen = screenId;
 
-  // Screen switch
   if (screenId === 'landing') return renderLanding(appContent);
   if (screenId === 'rules') return renderRules(appContent);
-  if (screenId === 'dashboard') return renderDashboard(appContent);
   if (screenId === 'family') return renderFamilyPicker(appContent);
+  if (screenId === 'dashboard') return renderDashboard(appContent);
 
+  // Sections A–E
+  if (screenId === 'section-a') return renderSectionA(appContent);
+  if (screenId === 'section-b') return renderSectionB(appContent);
+  if (screenId === 'section-c') return renderSectionC(appContent);
+  if (screenId === 'section-d') return renderSectionD(appContent);
+  if (screenId === 'section-e') return renderSectionE(appContent);
 
-  // Fallback (kept from your original scaffold)
+  // Fallback
   appContent.innerHTML = `
     <section class="screen screen--${screenId}">
       <h1>${screenId}</h1>
