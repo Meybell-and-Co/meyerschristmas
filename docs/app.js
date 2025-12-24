@@ -582,7 +582,7 @@ function renderSectionA(appContent) {
 
   // Back
   document.getElementById('back-to-dashboard').addEventListener('click', () => navigate('dashboard'));
-}
+
 function renderSectionB(appContent) { return renderSectionPlaceholder(appContent, 'B', 'Most Likely To…'); }
 function renderSectionC(appContent) { return renderSectionPlaceholder(appContent, 'C', 'Traditions & Memory'); }
 function renderSectionD(appContent) { return renderSectionPlaceholder(appContent, 'D', 'Draw / Sketch'); }
