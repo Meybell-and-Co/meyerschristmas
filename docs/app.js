@@ -215,10 +215,6 @@ function renderDashboard(appContent) {
    5.) SCREEN RENDERER
    D: Family Picker (names now, photos later)
 ========================= */
-/* =========================
-   5.) SCREEN RENDERER
-   D: Family Picker (names now, photos later)
-========================= */
 function renderFamilyPicker(appContent) {
   const surname = appState.player.surname;
   const list = FAMILY_BY_SURNAME[surname] || [];
@@ -230,20 +226,28 @@ function renderFamilyPicker(appContent) {
 
       <div class="family-grid">
         ${list.map(p => `
-          <button class="btn btn--tile" data-person-id="${p.personId}">
+          <button
+            class="btn btn--tile"
+            data-person-id="${p.personId}"
+            type="button"
+          >
             ${p.displayName}
           </button>
         `).join('')}
       </div>
 
       <div class="rules-actions" style="margin-top:16px;">
-        <button class="btn btn--ghost" id="back-to-dashboard">Back</button>
-        <button class="btn btn--ghost" id="reset-app">Reset</button>
+        <button class="btn btn--ghost" id="back-to-dashboard" type="button">
+          Back
+        </button>
+        <button class="btn btn--ghost" id="reset-app" type="button">
+          Reset
+        </button>
       </div>
     </section>
   `;
 
-  // Pick person
+  /* -------- Bind person selection -------- */
   document.querySelectorAll('[data-person-id]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const personId = e.currentTarget.dataset.personId;
@@ -253,19 +257,18 @@ function renderFamilyPicker(appContent) {
     });
   });
 
-  // Back
-  document.getElementById('back-to-dashboard')
-    .addEventListener('click', () => navigate('dashboard'));
+  /* -------- Bind Back -------- */
+  const backBtn = document.getElementById('back-to-dashboard');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => navigate('dashboard'));
+  }
 
-  // Reset (UAT)
-  document.getElementById('reset-app')
-    .addEventListener('click', resetAppData);
+  /* -------- Bind Reset (UAT helper) -------- */
+  const resetBtn = document.getElementById('reset-app');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetAppData);
+  }
 }
-
-
-  document.getElementById('back-to-dashboard').addEventListener('click', () => {
-    navigate('dashboard');
-  });
 
 /* =========================
    BASIC ROUTER
