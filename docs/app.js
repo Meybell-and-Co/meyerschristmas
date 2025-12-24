@@ -75,7 +75,7 @@ const FAMILY_BY_SURNAME = {
 
 /* =========================
    2.) STORAGE HELPERS
-   D: Reset Helpers (UAT)
+   D: Reset Helpers (UAT) 2:25 a.m.
 ========================= */
 function resetAppData() {
   localStorage.removeItem(STORAGE_KEYS.playerId);
@@ -90,16 +90,16 @@ function resetAppData() {
   window.location.reload();
 }
 
-/* =========================
-   3.) PLAYER ID
-   A: Ensure we have one
-========================= */
 function ensurePlayerId() {
   let id = getStored(STORAGE_KEYS.playerId);
 
   if (!id) {
-    // crypto.randomUUID() is widely supported; fallback is fine for our needs.
-    id = (crypto?.randomUUID?.() || `mcq_${Math.random().toString(16).slice(2)}`);
+    if (window.crypto && typeof crypto.randomUUID === 'function') {
+      id = crypto.randomUUID();
+    } else {
+      id = `mcq_${Math.random().toString(16).slice(2)}`;
+    }
+
     setStored(STORAGE_KEYS.playerId, id);
   }
 
@@ -150,44 +150,39 @@ function renderLanding(appContent) {
 
 /* =========================
    5.) SCREEN RENDERER
-   B: House Rules (TOU)
+   B: House Rules (TOU) 2:20am
 ========================= */
-function renderFamilyPicker(appContent) {
+function renderRules(appContent) {
   appContent.innerHTML = `
-    <section class="screen screen--family">
-      <h1>Who are you?</h1>
-      <p class="muted">Pick your name (photos coming later).</p>
+    <section class="screen screen--rules">
+      <h1>House Rules</h1>
+      <p class="muted">(How We Keep This Fun)</p>
 
-      <div class="family-grid">
-        ${list.map(p => `
-          <button class="btn btn--tile" data-person-id="${p.personId}">
-            ${p.displayName}
-          </button>
-        `).join('')}
-      </div>
+      <ul class="rules-list">
+        <li>You can pass or recuse yourself on any prompt — no questions, no consequences.</li>
+        <li>Be charitable in your responses; if you’re named, assume it’s coming from a place of love.</li>
+        <li>Be sensitive to little ears (PG-13 energy).</li>
+        <li>No shade or digs — be funny, not Grinchy.</li>
+      </ul>
 
-      <!-- 👇 THIS is where Reset goes -->
       <div class="rules-actions" style="margin-top:16px;">
-        <button class="btn btn--ghost" id="back-to-dashboard">Back</button>
-        <button class="btn btn--ghost" id="reset-app">Reset</button>
+        <button class="btn btn--primary" id="rules-agree">I Agree</button>
+        <button class="btn btn--ghost" id="rules-decline">Decline</button>
       </div>
     </section>
   `;
-}
 
   document.getElementById('rules-agree').addEventListener('click', () => {
     appState.player.hasAgreedToRules = true;
     setStored(STORAGE_KEYS.rulesOk, 'true');
-
-    // Next screen placeholder (we’ll add Family Picker next)
     navigate('family');
   });
 
   document.getElementById('rules-decline').addEventListener('click', () => {
-    // Placeholder for Krampus modal later
     alert('😈 Krampus says: try again.');
   });
 }
+
 
 /* =========================
    5.) SCREEN RENDERER
@@ -220,6 +215,10 @@ function renderDashboard(appContent) {
    5.) SCREEN RENDERER
    D: Family Picker (names now, photos later)
 ========================= */
+/* =========================
+   5.) SCREEN RENDERER
+   D: Family Picker (names now, photos later)
+========================= */
 function renderFamilyPicker(appContent) {
   const surname = appState.player.surname;
   const list = FAMILY_BY_SURNAME[surname] || [];
@@ -239,22 +238,30 @@ function renderFamilyPicker(appContent) {
 
       <div class="rules-actions" style="margin-top:16px;">
         <button class="btn btn--ghost" id="back-to-dashboard">Back</button>
+        <button class="btn btn--ghost" id="reset-app">Reset</button>
       </div>
     </section>
   `;
 
+  // Pick person
   document.querySelectorAll('[data-person-id]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const personId = e.currentTarget.dataset.personId;
       appState.player.personId = personId;
       setStored(STORAGE_KEYS.personId, personId);
       navigate('dashboard');
-
-  document.getElementById('reset-app').addEventListener('click', resetAppData);
-
-       
     });
   });
+
+  // Back
+  document.getElementById('back-to-dashboard')
+    .addEventListener('click', () => navigate('dashboard'));
+
+  // Reset (UAT)
+  document.getElementById('reset-app')
+    .addEventListener('click', resetAppData);
+}
+
 
   document.getElementById('back-to-dashboard').addEventListener('click', () => {
     navigate('dashboard');
