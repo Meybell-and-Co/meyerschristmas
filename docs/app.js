@@ -152,8 +152,9 @@ function escapeHtml(str) {
    2.) STORAGE HELPERS
    F: Section Data Helpers (JSON)
 ========================= */
-STORAGE_KEYS.sectionA = 'mcq_section_a';
-
+function getSectionAKey(personId) {
+  return `mcq_${personId}_section_a`;
+}
 function getStoredJSON(key, fallback) {
   const raw = getStored(key);
   if (!raw) return fallback;
@@ -266,29 +267,18 @@ function renderRules(appContent) {
    5.) DASHBOARD HELPERS
    A: Progress Status (MVP)
 ========================= */
+function getSectionAStatus() {
+  const raw = getStored(STORAGE_KEYS.sectionA);
+  if (!raw) return { label: 'Not started', tone: 'neutral', icon: '' };
 
-// Person-scoped storage key for Section A
-function getSectionAKey(personId) {
-  return `mcq_${personId}_section_a`;
-}
-
-function getSectionAStatus(personId) {
-  if (!personId) return { label: 'Not started', tone: 'neutral', icon: '' };
-
-  const key = getSectionAKey(personId);
   const defaultData = { selectedPromptIds: [], customPrompts: [], writerChoice: 'self' };
+  const data = getStoredJSON(STORAGE_KEYS.sectionA, defaultData);
 
-  // null fallback lets us detect "key does not exist"
-  const data = getStoredJSON(key, null);
-  if (!data) return { label: 'Not started', tone: 'neutral', icon: '' };
+  const hasPrompt = Array.isArray(data.selectedPromptIds) && data.selectedPromptIds.length > 0;
+  const hasCustom = Array.isArray(data.customPrompts) && data.customPrompts.some(v => String(v).trim().length > 0);
+  const isComplete = hasPrompt || hasCustom;
 
-  const selected = Array.isArray(data.selectedPromptIds) ? data.selectedPromptIds : [];
-  const customs  = Array.isArray(data.customPrompts) ? data.customPrompts : [];
-
-  const hasPrompt = selected.length > 0;
-  const hasCustom = customs.some(v => String(v).trim().length > 0);
-
-  if (hasPrompt || hasCustom) return { label: 'Complete', tone: 'good', icon: '✓' };
+  if (isComplete) return { label: 'Complete', tone: 'good', icon: '✓' };
   return { label: 'In progress', tone: 'warn', icon: '•' };
 }
 
@@ -319,6 +309,10 @@ function renderDashboard(appContent) {
     const match = list.find(p => p.personId === personId);
     displayName = match ? match.displayName : null;
   }
+
+  const sectionStatuses = Object.fromEntries(
+    SECTIONS.map(s => [s.screen, getTileStatusForScreen(s.screen)])
+  );
 
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
