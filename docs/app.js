@@ -78,15 +78,15 @@ const FAMILY_BY_SURNAME = {
    D: Reset Helpers (UAT) 2:25 a.m.
 ========================= */
 function resetAppData() {
-  localStorage.removeItem(STORAGE_KEYS.playerId);
-  localStorage.removeItem(STORAGE_KEYS.surname);
-  localStorage.removeItem(STORAGE_KEYS.rulesOk);
-  localStorage.removeItem(STORAGE_KEYS.personId);
+  const prefix = 'mcq_';
+  const toRemove = [];
 
-  // Optional: in case anything else ever lands here
-  // localStorage.clear();
-  // sessionStorage.clear();
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(prefix)) toRemove.push(k);
+  }
 
+  toRemove.forEach(k => localStorage.removeItem(k));
   window.location.reload();
 }
 
@@ -267,18 +267,20 @@ function renderRules(appContent) {
    5.) DASHBOARD HELPERS
    A: Progress Status (MVP)
 ========================= */
-function getSectionAStatus() {
-  const raw = getStored(STORAGE_KEYS.sectionA);
-  if (!raw) return { label: 'Not started', tone: 'neutral', icon: '' };
+function getSectionAStatus(personId) {
+  if (!personId) return { label: 'Not started', tone: 'neutral', icon: '' };
 
-  const defaultData = { selectedPromptIds: [], customPrompts: [], writerChoice: 'self' };
-  const data = getStoredJSON(STORAGE_KEYS.sectionA, defaultData);
+  const key = getSectionAKey(personId);
+  const data = getStoredJSON(key, null);
+  if (!data) return { label: 'Not started', tone: 'neutral', icon: '' };
 
-  const hasPrompt = Array.isArray(data.selectedPromptIds) && data.selectedPromptIds.length > 0;
-  const hasCustom = Array.isArray(data.customPrompts) && data.customPrompts.some(v => String(v).trim().length > 0);
-  const isComplete = hasPrompt || hasCustom;
+  const selected = Array.isArray(data.selectedPromptIds) ? data.selectedPromptIds : [];
+  const customs  = Array.isArray(data.customPrompts) ? data.customPrompts : [];
 
-  if (isComplete) return { label: 'Complete', tone: 'good', icon: '✓' };
+  const hasPrompt = selected.length > 0;
+  const hasCustom = customs.some(v => String(v).trim().length > 0);
+
+  if (hasPrompt || hasCustom) return { label: 'Complete', tone: 'good', icon: '✓' };
   return { label: 'In progress', tone: 'warn', icon: '•' };
 }
 
@@ -309,10 +311,6 @@ function renderDashboard(appContent) {
     const match = list.find(p => p.personId === personId);
     displayName = match ? match.displayName : null;
   }
-
-const sectionStatuses = Object.fromEntries(
-  SECTIONS.map(s => [s.screen, getTileStatusForScreen(s.screen, personId)])
-);
 
   appContent.innerHTML = `
     <section class="screen screen--dashboard">
@@ -442,10 +440,6 @@ function renderSectionA(appContent) {
   };
 
   let data = getStoredJSON(storageKey, defaultData);
-
-  function save(next) {
-    data = next;
-    setStoredJSON(storageKey, next);
   }
 
   // Build IDs for prompt bank (stable)
